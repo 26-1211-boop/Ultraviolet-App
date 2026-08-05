@@ -7,7 +7,6 @@
         <link rel="shortcut icon" content="favicon.ico" />
         <link rel="stylesheet" href="index.css" />
 
-        <!-- Ultraviolet 핵심 파일만 로드 -->
         <script src="/uv/uv.bundle.js"></script>
         <script src="/uv/uv.config.js"></script>
     </head>
@@ -47,19 +46,18 @@
         </footer>
 
         <script>
-            // Service Worker 등록
+            // 1. Service Worker 등록
             if ("serviceWorker" in navigator) {
                 navigator.serviceWorker.register("/uv/uv.sw.js", {
                     scope: __uv$config.prefix
-                }).catch(err => console.error("SW Register Fail:", err));
+                }).catch(err => console.error("SW 등록 실패:", err));
             }
 
-            // 폼 제출 이벤트 가로채기 (페이지 새로고침 방지)
             const form = document.getElementById("uv-form");
             const address = document.getElementById("uv-address");
 
-            form.addEventListener("submit", (event) => {
-                event.preventDefault(); // 새로고침(초기화) 즉시 차단
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
 
                 let url = address.value.trim();
                 if (!url) return;
@@ -72,7 +70,16 @@
                     }
                 }
 
-                // 프록시 URL로 이동
+                // 핵심: Service Worker가 활성화(Ready)될 때까지 기다린 후 이동
+                if ("serviceWorker" in navigator) {
+                    try {
+                        await navigator.serviceWorker.ready;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                // 프록시 주소로 이동
                 window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
             });
         </script>
