@@ -2,7 +2,7 @@
 	"name": "uv-app",
 	"version": "1.0.0",
 	"description": "Ultraviolet instance",
-	"type": "module"
+	"type": "module",
 	"engines": {
         "node": ">=24.0.0"
     },
