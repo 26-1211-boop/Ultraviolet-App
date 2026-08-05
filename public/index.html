@@ -91,49 +91,51 @@
         <iframe style="display: none" id="uv-frame"></iframe>
 
         <script>
-            window.addEventListener("load", async () => {
-                // 1. Service Worker 등록
-                if ("serviceWorker" in navigator) {
-                    try {
-                        await navigator.serviceWorker.register("/uv/uv.sw.js", {
-                            scope: __uv$config.prefix,
-                        });
-                    } catch (err) {
-                        console.error("SW Register Error:", err);
-                    }
-                }
+            // 1. Service Worker 등록
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("/uv/uv.sw.js", {
+                    scope: __uv$config.prefix,
+                }).catch(err => console.error("SW Error:", err));
+            }
 
-                // 2. BareMux & Wisp 서버 설정
+            // 2. 엔터키/검색 제출 이벤트 (블로킹 없이 즉시 작동되도록 등록)
+            document.addEventListener("DOMContentLoaded", () => {
+                const form = document.getElementById("uv-form");
+                const address = document.getElementById("uv-address");
+
+                if (form) {
+                    form.addEventListener("submit", (event) => {
+                        event.preventDefault();
+
+                        let url = address.value.trim();
+                        if (!url) return;
+
+                        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                            if (url.includes(".") && !url.includes(" ")) {
+                                url = "https://" + url;
+                            } else {
+                                url = "https://www.google.com/search?q=" + encodeURIComponent(url);
+                            }
+                        }
+
+                        if (window.__uv$config) {
+                            window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
+                        } else {
+                            alert("Ultraviolet 라이브러리가 로드되지 않았습니다.");
+                        }
+                    });
+                }
+            });
+
+            // 3. 백그라운드에서 Wisp 서버 연결 실행
+            (async () => {
                 try {
                     const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
                     await connection.setTransport("/epoxy/index.mjs", [{ wisp: "wss://wisp.mercuryworkshop.sub.ro/" }]);
                 } catch (err) {
                     console.error("Wisp Transport Error:", err);
                 }
-
-                // 3. 폼 제출 강제 가로채기 (페이지 새로고침 방지 및 검색 처리)
-                const form = document.getElementById("uv-form");
-                const address = document.getElementById("uv-address");
-
-                form.addEventListener("submit", async (event) => {
-                    event.preventDefault(); // 새로고침 방지
-                    
-                    let url = address.value.trim();
-                    if (!url) return;
-
-                    // URL 형식 검사
-                    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                        if (url.includes(".") && !url.includes(" ")) {
-                            url = "https://" + url;
-                        } else {
-                            url = "https://www.google.com/search?q=" + encodeURIComponent(url);
-                        }
-                    }
-
-                    // Ultraviolet 인코딩 이동
-                    window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
-                });
-            });
+            })();
         </script>
     </body>
 </html>
