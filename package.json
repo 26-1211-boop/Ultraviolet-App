@@ -1,21 +1,17 @@
 {
-	"name": "uv-app",
-	"version": "1.0.0",
-	"description": "Ultraviolet instance",
-	"type": "module",
-	"engines": {
-        "node": ">=24.0.0"
-    },
-	},
-	"scripts": {
-		"start": "node src/index.js",
-		"format": "prettier --write .",
-		"lint": "eslint ./src/",
-		"lint:fix": "eslint ./src/ --fix"
-	},
-	"keywords": [
-		"proxy"
-	],
+  "name": "uv-app",
+  "version": "1.0.0",
+  "description": "Ultraviolet instance",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "format": "prettier --write .",
+    "lint": "eslint ./src/",
+    "lint:fix": "eslint ./src/ --fix"
+  },
+  "keywords": [
+    "proxy"
+  ],
 	"packageManager": "pnpm@10.28.0",
 	"author": "",
 	"license": "GPL-3.0-or-later",
